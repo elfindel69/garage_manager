@@ -5,6 +5,9 @@ const newItemSubmitBtn = newItemForm.querySelector("#new-item-submit");
 const newItemBrandInput = newItemForm.querySelector("#item-brand");
 const newItemModelInput = newItemForm.querySelector("#item-model");
 
+/**
+ * check des inputs
+ */
 function onInputCheckValue(){
     if(newItemBrandInput.value !== '' && newItemModelInput.value !==''){
         newItemSubmitBtn.hidden = false
@@ -12,6 +15,8 @@ function onInputCheckValue(){
         newItemSubmitBtn.hidden = true
     }
 }
+
+//envoi du formulaire
 function onSubmitNewItemForm(e){
     e.preventDefault();
 
