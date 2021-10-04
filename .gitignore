@@ -1,3 +1,5 @@
 .idea
 node_modules
 **/.gclient
+_bad_scm
+_gclient_*
