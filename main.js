@@ -1,31 +1,38 @@
-const {app, BrowserWindow,ipcMain,dialog} = require('electron');
+const {app, BrowserWindow,ipcMain,dialog, Menu} = require('electron');
 const path = require('path');
-
+const Store = require("electron-store");
 let newItemWindow;
 let editItemWindow;
 let homeWindow;
 
-/**
- * tableau de voitures
- * @type {[{model: string, id: number, brand: string}, {model: string, id: number, brand: string}, {model: string, id: number, brand: string}]}
- */
-const cars = [
-    {
-        id: 1,
-        brand: "Renault",
-        model: "Clio"
-    },
-    {
-        id: 2,
-        brand: "Peugeot",
-        model: "308"
-    },
-    {
-        id: 3,
-        brand: "Citroën",
-        model: "DS"
-    }
-]
+
+let cars=null;
+//persistance en JSON
+const store = new Store();
+
+if(store.has("cars")){
+    cars = store.get("cars");
+}else{
+    cars = [
+        {
+            id: 1,
+            brand: "Renault",
+            model: "Clio"
+        },
+        {
+            id: 2,
+            brand: "Peugeot",
+            model: "308"
+        },
+        {
+            id: 3,
+            brand: "Citroën",
+            model: "DS"
+        }
+    ];
+    store.set("cars",cars);
+}
+
 
 /**
  * fonction de création de fenêtre
@@ -62,7 +69,8 @@ function createWindow(viewName,dataToSend,width=1600,height=900) {
 /**
  * channel d'ajout d'item
  */
-ipcMain.on('open-new-item-window',(e,data)=>{
+
+const openNewItemWindowCb = ()=>{
     //si il y a une fenêtre, on l'affiche
     if(newItemWindow){
         newItemWindow.focus();
@@ -79,7 +87,7 @@ ipcMain.on('open-new-item-window',(e,data)=>{
         }
         newItem.id = id;
         cars.push(newItem);
-
+        store.set("cars",cars);
         //envoi de l'item à la vue principale
         homeWindow.send('new-item-added',{
             item: [newItem]
@@ -94,7 +102,9 @@ ipcMain.on('open-new-item-window',(e,data)=>{
         newItemWindow = null;
         ipcMain.removeHandler('new-item');
     });
-})
+};
+
+ipcMain.on('open-new-item-window',openNewItemWindowCb);
 
 /**
  * édition d'un item
@@ -115,7 +125,7 @@ ipcMain.on('open-edit-item-window',(e,data)=>{
             ipcMain.handle('edit-item',(e,data)=>{
                 cars[index].brand = data.brand;
                 cars[index].model = data.model;
-
+                store.set("cars",cars);
                 //mise à jour du front
                 homeWindow.send('edited-item',{item:cars[index]});
 
@@ -138,7 +148,7 @@ ipcMain.on('open-edit-item-window',(e,data)=>{
     })
 
 
-})
+});
 
 /**
  * suppression d'un item
@@ -161,6 +171,7 @@ ipcMain.handle('show-confirm-delete-item', (e,data)=>{
                 // Permet de supprimer un certain nombre d'élément
                 // à partir d'un index donné
                 cars.splice(index,1);
+                store.set("cars",cars);
                 // Slice permet d'extraire une partie d'un tableau
                 break;
             }
@@ -173,7 +184,9 @@ ipcMain.handle('show-confirm-delete-item', (e,data)=>{
 
     //retour si élément supprimé
     return {choice};
-})
+});
+
+
 
 //création de la fenêtre
 app.whenReady().then(()=>{
@@ -195,4 +208,39 @@ app.on('activate', () => {
 });
 
 
+const menuConfig = [
+    {
+        label: 'Action',
+        submenu: [
+            {
+                label: 'Nouvelle voiture',
+                accelerator: 'CmdOrCtrl+N',
+                click() {
+                    openNewItemWindowCb();
+                }
+            },
+            {
+                label: 'Activer/Désactiver le mode édition',
+                accelerator: 'CmdOrCtrl+E',
+                click() {
+                    homeWindow.send('toggle-edition-mode');
+                }
+            }
+        ]
+    },
+    {
+        label: 'Fenêtre',
+        submenu: [
+            {role:"reload"},
+            {role:"toggledevtools"},
+            {type:"separator"},
+            {role:"togglefullscreen"},
+            {role:"minimize"},
+            {type:"separator"},
+            {role:"close"}
+        ]
+    }
+];
 
+const menu = Menu.buildFromTemplate(menuConfig);
+Menu.setApplicationMenu(menu);

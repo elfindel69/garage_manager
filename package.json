@@ -13,6 +13,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
     "bootswatch": "^5.1.1",
-    "electron": "^15.0.0"
+    "electron": "^15.0.0",
+    "electron-store": "^8.0.1"
   }
 }

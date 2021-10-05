@@ -1,7 +1,7 @@
 const {ipcRenderer} = require("electron");
 
 let cbEditedItem;
-
+let isEditionModeActivated = false;
 /**
  * fonction de création de ligne d'item
  * @param tbodyId tableau à modifier
@@ -27,7 +27,7 @@ function generateRowLine(tbodyId,data){
         tdModel.classList.add("col-3");
         const tdButtons = document.createElement("td");
         tdButtons.classList.add("col-4");
-
+        tdButtons.hidden = !isEditionModeActivated;
         //bouton d'édition
         const editBtn = document.createElement("button");
         editBtn.innerText = 'Modif.';
@@ -97,3 +97,12 @@ ipcRenderer.on("new-item-added",(e,data)=>{
         generateRowLine("cars-table",data.item);
     }
 )
+
+ipcRenderer.on("toggle-edition-mode",()=>{
+    isEditionModeActivated = !isEditionModeActivated;
+    const trTHeads = document.querySelectorAll('thead tr');
+    trTHeads[0].lastElementChild.hidden = !trTHeads[0].lastElementChild.hidden;
+
+    const trTBodies = document.querySelectorAll('tbody tr');
+    trTBodies.forEach(tr=>{tr.lastElementChild.hidden = !tr.lastElementChild.hidden});
+})
