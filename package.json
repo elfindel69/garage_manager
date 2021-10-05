@@ -22,7 +22,6 @@
     "electron-builder": "^22.11.7",
     "electron": "^15.0.0"
   },
-  "version": "1.0.0",
   "build": {
     "appId": "elfindel69.garage_manager",
     "mac": {
