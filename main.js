@@ -207,7 +207,7 @@ app.on('activate', () => {
     }
 });
 
-
+//menu
 const menuConfig = [
     {
         label: 'Action',
