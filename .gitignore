@@ -3,3 +3,6 @@ node_modules
 **/.gclient
 _bad_scm
 _gclient_*
+dist
+package-lock.json
+yarn.lock
